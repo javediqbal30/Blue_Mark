@@ -1,0 +1,1567 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Insights | Blue Mark Advisory</title>
+    <meta name="description"
+        content="Blue Mark Advisory provides UK and USA formation, accounting, tax and compliance services.">
+    <meta name="theme-color" content="#071829">
+    <link rel="stylesheet" href="/assets/style.css?v=4">
+    <script defer src="/assets/app.js?v=2"></script>
+
+    <!-- ===== Silence any old voice/audio code from app.js on this page ===== -->
+    <script>
+        (function () {
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak = function () { };
+                }
+                var play = HTMLMediaElement.prototype.play;
+                HTMLMediaElement.prototype.play = function () {
+                    if (this.tagName === 'AUDIO') return Promise.resolve();
+                    return play.apply(this, arguments);
+                };
+            } catch (e) { }
+        })();
+    </script>
+
+    <!-- ===== Hero chat bot styles ===== -->
+    <style>
+        .stage {
+            position: relative;
+        }
+
+        .stage .person {
+            cursor: pointer;
+        }
+
+        /* Hide the old voice-driven bubbles; the chat bubbles replace them */
+        .stage .bubble-layer {
+            display: none !important;
+        }
+
+        /* Speech bubbles beside the advisor */
+        .bm-talk {
+            position: absolute;
+            left: 0;
+            top: 4%;
+            width: min(64%, 340px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 6;
+            pointer-events: none;
+        }
+
+        .bm-bubble {
+            pointer-events: auto;
+            position: relative;
+            max-width: 100%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.45;
+            box-shadow: 0 14px 34px rgba(3, 12, 24, .28);
+            animation: bmPop .38s cubic-bezier(.2, .9, .3, 1.25) both;
+        }
+
+        .bm-bubble.bot {
+            align-self: flex-end;
+            background: #fff;
+            color: #0d1b2a;
+            border-bottom-right-radius: 6px;
+            transform-origin: bottom right;
+        }
+
+        .bm-bubble.bot::after {
+            content: "";
+            position: absolute;
+            right: -6px;
+            bottom: 8px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            transform: rotate(45deg);
+            border-radius: 2px;
+        }
+
+        .bm-bubble.bot .who {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #1f5eff;
+            margin-bottom: 4px;
+        }
+
+        .bm-bubble.bot .who::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, .2);
+        }
+
+        .bm-bubble.bot a,
+        .bm-bubble.bot .bm-link {
+            display: inline-flex;
+            margin-top: 8px;
+            font: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f5eff;
+            text-decoration: none;
+            background: none;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(31, 94, 255, .3);
+        }
+
+        .bm-bubble.user {
+            align-self: flex-start;
+            background: linear-gradient(135deg, #1f5eff, #4f8cff);
+            color: #fff;
+            border-bottom-left-radius: 6px;
+            font-weight: 500;
+            transform-origin: bottom left;
+        }
+
+        .bm-bubble.leaving {
+            animation: bmOut .28s ease forwards;
+        }
+
+        .bm-typing {
+            display: inline-flex;
+            gap: 5px;
+            padding: 4px 2px;
+        }
+
+        .bm-typing i {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #9fb3cf;
+            animation: bmDot 1s infinite ease-in-out;
+        }
+
+        .bm-typing i:nth-child(2) {
+            animation-delay: .15s;
+        }
+
+        .bm-typing i:nth-child(3) {
+            animation-delay: .3s;
+        }
+
+        @keyframes bmPop {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(.85);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @keyframes bmOut {
+            to {
+                opacity: 0;
+                transform: translateY(-10px) scale(.95);
+            }
+        }
+
+        @keyframes bmDot {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: .5;
+            }
+
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+
+        /* Advisor animation while "speaking" (individual transform props
+           so they combine with the existing style.css transforms) */
+        .person.is-talking .mouth {
+            animation: bmMouth .16s infinite alternate ease-in-out;
+        }
+
+        @keyframes bmMouth {
+            from {
+                scale: 1 .45;
+            }
+
+            to {
+                scale: 1.05 1.5;
+            }
+        }
+
+        .person.is-talking {
+            animation: bmNod 1.6s infinite ease-in-out;
+        }
+
+        @keyframes bmNod {
+
+            0%,
+            100% {
+                translate: 0 0;
+            }
+
+            50% {
+                translate: 0 -3px;
+            }
+        }
+
+        .person.is-waving .arm.r {
+            animation: bmWave .5s 3 ease-in-out;
+        }
+
+        @keyframes bmWave {
+
+            0%,
+            100% {
+                rotate: 0deg;
+            }
+
+            50% {
+                rotate: -18deg;
+            }
+        }
+
+        .stage .eye {
+            transition: translate .12s ease-out;
+        }
+
+        /* Ask panel in the hero copy */
+        .bm-ask {
+            margin-top: 26px;
+            padding: 18px;
+            border-radius: 20px;
+            background: color-mix(in srgb, currentColor 6%, transparent);
+            border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+            backdrop-filter: blur(8px);
+            max-width: 520px;
+        }
+
+        .bm-ask-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            opacity: .85;
+            margin-bottom: 12px;
+        }
+
+        .bm-live {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: bmPulse 2s infinite;
+        }
+
+        @keyframes bmPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, .6);
+            }
+
+            70% {
+                box-shadow: 0 0 0 9px rgba(34, 197, 94, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
+        }
+
+        .bm-quick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .bm-quick button {
+            font: inherit;
+            font-size: 14px;
+            color: inherit;
+            cursor: pointer;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, currentColor 8%, transparent);
+            border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+            transition: background .2s, transform .2s, border-color .2s;
+        }
+
+        .bm-quick button:hover,
+        .bm-quick button:focus-visible {
+            background: #1f5eff;
+            border-color: #1f5eff;
+            color: #fff;
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .bm-ask-form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .bm-ask-form input {
+            flex: 1;
+            min-width: 0;
+            font: inherit;
+            font-size: 15px;
+            color: inherit;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, currentColor 6%, transparent);
+            border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+            outline: none;
+        }
+
+        .bm-ask-form input::placeholder {
+            color: inherit;
+            opacity: .55;
+        }
+
+        .bm-ask-form input:focus {
+            border-color: #4f8cff;
+            box-shadow: 0 0 0 4px rgba(79, 140, 255, .2);
+        }
+
+        .bm-ask-form button {
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            border: 0;
+            border-radius: 999px;
+            padding: 0 20px;
+            color: #fff;
+            background: linear-gradient(135deg, #1f5eff, #4f8cff);
+            box-shadow: 0 8px 20px rgba(31, 94, 255, .35);
+            transition: transform .2s;
+        }
+
+        .bm-ask-form button:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 640px) {
+            .bm-talk {
+                width: 78%;
+            }
+
+            .bm-bubble {
+                font-size: 14px;
+                padding: 10px 13px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .bm-bubble,
+            .bm-typing i,
+            .bm-live,
+            .person.is-talking,
+            .person.is-talking .mouth,
+            .person.is-waving .arm.r {
+                animation: none !important;
+            }
+        }
+    </style>
+
+    <!-- ===== Blog grid styles (scoped to .bm-blog) ===== -->
+    <style>
+        .bm-blog {
+            --bm-navy: #071829;
+            --bm-blue: #1f5eff;
+            --bm-blue-2: #4f8cff;
+            --bm-ink: #0d1b2a;
+            --bm-muted: #5d6b7c;
+            --bm-line: #e3e8ef;
+            --bm-chip: #eef2f7;
+            --bm-card: #ffffff;
+        }
+
+        /* Toolbar */
+        .bm-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--bm-line);
+            margin-top: 8px;
+        }
+
+        .bm-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .bm-chip {
+            border: 0;
+            cursor: pointer;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: var(--bm-chip);
+            color: #2b3a4c;
+            transition: background .2s, color .2s, transform .2s;
+        }
+
+        .bm-chip:hover {
+            background: #e1e8f2;
+            transform: translateY(-1px);
+        }
+
+        .bm-chip.is-active {
+            background: var(--bm-blue);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(31, 94, 255, .28);
+        }
+
+        .bm-chip .count {
+            opacity: .8;
+            font-weight: 400;
+            margin-left: 2px;
+        }
+
+        .bm-search {
+            position: relative;
+            flex: 0 1 290px;
+            min-width: 220px;
+        }
+
+        .bm-search svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #8a97a8;
+        }
+
+        .bm-search input {
+            width: 100%;
+            box-sizing: border-box;
+            font: inherit;
+            font-size: 14px;
+            padding: 11px 14px 11px 40px;
+            border-radius: 999px;
+            border: 1px solid var(--bm-line);
+            background: #fff;
+            color: var(--bm-ink);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .bm-search input:focus {
+            border-color: var(--bm-blue-2);
+            box-shadow: 0 0 0 4px rgba(79, 140, 255, .15);
+        }
+
+        .bm-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--bm-muted);
+            margin: 26px 0 26px;
+        }
+
+        .bm-meta b {
+            color: var(--bm-ink);
+        }
+
+        /* Grid + cards */
+        .bm-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 32px;
+        }
+
+        .bm-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--bm-card);
+            border: 1px solid var(--bm-line);
+            border-radius: 18px;
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: transform .25s, box-shadow .25s, border-color .25s;
+        }
+
+        .bm-card:hover,
+        .bm-card:focus-visible {
+            transform: translateY(-4px);
+            border-color: #cfd9e8;
+            box-shadow: 0 18px 40px rgba(7, 24, 41, .10);
+            outline: none;
+        }
+
+        .bm-card:hover .bm-card-title {
+            color: var(--bm-blue);
+        }
+
+        .bm-card[hidden] {
+            display: none;
+        }
+
+        .bm-info {
+            font-size: 13px;
+            color: #7a8797;
+            margin: 20px 0 10px;
+        }
+
+        .bm-info .cat {
+            color: var(--bm-blue);
+            font-weight: 600;
+        }
+
+        .bm-info .dot {
+            margin: 0 6px;
+        }
+
+        .bm-card-title {
+            font-size: 19px;
+            line-height: 1.35;
+            font-weight: 700;
+            color: var(--bm-ink);
+            margin: 0 0 12px;
+            transition: color .2s;
+        }
+
+        .bm-excerpt {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--bm-muted);
+            margin: 0 0 18px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .bm-card-foot {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--bm-line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bm-read {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--bm-ink);
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .bm-card:hover .bm-read {
+            color: var(--bm-blue);
+        }
+
+        .bm-read span {
+            transition: transform .2s;
+        }
+
+        .bm-card:hover .bm-read span {
+            transform: translateX(4px);
+        }
+
+        .bm-tag {
+            font-size: 12px;
+            color: #9aa5b3;
+        }
+
+        /* ===== Thumbnail banner (pure CSS/SVG, no images needed) ===== */
+        .bm-thumb {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            overflow: hidden;
+            container-type: inline-size;
+            background:
+                radial-gradient(120% 90% at 100% 100%, rgba(79, 140, 255, .55), transparent 60%),
+                radial-gradient(80% 70% at 0% 0%, rgba(255, 255, 255, .95), transparent 60%),
+                linear-gradient(135deg, #f4f7ff 0%, #dfe8ff 45%, #9fb8ff 100%);
+        }
+
+        .bm-thumb::before {
+            /* soft wave */
+            content: "";
+            position: absolute;
+            inset: auto -10% -35% -10%;
+            height: 70%;
+            background: linear-gradient(120deg, rgba(31, 94, 255, .35), rgba(7, 24, 41, .15));
+            border-radius: 50% 50% 0 0;
+            filter: blur(2px);
+        }
+
+        .bm-thumb::after {
+            /* dot pattern corner */
+            content: "";
+            position: absolute;
+            right: 4%;
+            top: 5%;
+            width: 12%;
+            height: 14%;
+            background-image: radial-gradient(rgba(7, 24, 41, .25) 1px, transparent 1.2px);
+            background-size: 8px 8px;
+        }
+
+        .bm-thumb.t-uk {
+            --acc: #1f5eff;
+            --acc2: #7aa2ff;
+        }
+
+        .bm-thumb.t-usa {
+            --acc: #1440c8;
+            --acc2: #ff5a6a;
+        }
+
+        .bm-thumb.t-both {
+            --acc: #3a2fd8;
+            --acc2: #4f8cff;
+        }
+
+        .bm-brand {
+            position: absolute;
+            left: 5%;
+            top: 7%;
+            display: flex;
+            align-items: center;
+            gap: 2cqw;
+            font-weight: 800;
+            font-size: 5cqw;
+            color: var(--bm-navy);
+            line-height: 1;
+        }
+
+        .bm-brand i {
+            font-style: normal;
+            width: 7cqw;
+            height: 7cqw;
+            border-radius: 1.8cqw;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 4.2cqw;
+            background: linear-gradient(135deg, var(--bm-navy), var(--acc));
+        }
+
+        .bm-brand small {
+            display: block;
+            font-size: 2cqw;
+            font-weight: 600;
+            color: #4b5a6c;
+            margin-top: .8cqw;
+            letter-spacing: .02em;
+        }
+
+        .bm-headline {
+            position: absolute;
+            left: 5%;
+            top: 27%;
+            width: 54%;
+            font-weight: 900;
+            font-size: 5.6cqw;
+            line-height: 1.12;
+            color: var(--bm-navy);
+            letter-spacing: -.01em;
+        }
+
+        .bm-headline mark {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--acc), var(--acc2));
+            color: #fff;
+            padding: .3cqw 2cqw;
+            border-radius: 1.6cqw;
+            margin: .6cqw 0;
+            transform: rotate(-1.5deg);
+        }
+
+        .bm-icons {
+            position: absolute;
+            left: 5%;
+            bottom: 7%;
+            display: flex;
+            gap: 2.2cqw;
+        }
+
+        .bm-icons span {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .8cqw;
+            font-size: 1.7cqw;
+            font-weight: 600;
+            color: var(--bm-navy);
+            width: 9cqw;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .bm-icons svg {
+            width: 6.4cqw;
+            height: 6.4cqw;
+            padding: 1.3cqw;
+            box-sizing: border-box;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .9);
+            color: var(--acc);
+            box-shadow: 0 1cqw 2cqw rgba(7, 24, 41, .12);
+        }
+
+        .bm-art {
+            position: absolute;
+            right: 6%;
+            top: 20%;
+            width: 34%;
+            height: 68%;
+        }
+
+        .bm-doc {
+            position: absolute;
+            inset: 0 8% 6% 6%;
+            background: #fff;
+            border-radius: 2cqw;
+            box-shadow: 0 2.4cqw 5cqw rgba(7, 24, 41, .22);
+            padding: 3cqw 3cqw;
+            box-sizing: border-box;
+            transform: rotate(3deg);
+        }
+
+        .bm-doc.back {
+            transform: rotate(-7deg) translate(-8%, 4%);
+            opacity: .75;
+        }
+
+        .bm-doc b {
+            display: inline-block;
+            font-size: 2.4cqw;
+            color: #fff;
+            background: var(--acc);
+            padding: .6cqw 1.6cqw;
+            border-radius: 1cqw;
+            margin-bottom: 2cqw;
+            white-space: nowrap;
+        }
+
+        .bm-doc u {
+            display: block;
+            height: 1.1cqw;
+            border-radius: 1cqw;
+            background: #e4eaf4;
+            margin: 1.3cqw 0;
+            text-decoration: none;
+        }
+
+        .bm-doc u:nth-of-type(2) {
+            width: 80%;
+        }
+
+        .bm-doc u:nth-of-type(3) {
+            width: 92%;
+        }
+
+        .bm-doc u:nth-of-type(4) {
+            width: 60%;
+            background: color-mix(in srgb, var(--acc2) 45%, white);
+        }
+
+        .bm-badge {
+            position: absolute;
+            right: -2%;
+            bottom: 0;
+            min-width: 11cqw;
+            height: 11cqw;
+            padding: 0 1.6cqw;
+            box-sizing: border-box;
+            border-radius: 3cqw;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            font-size: 3.4cqw;
+            color: #fff;
+            background: linear-gradient(135deg, var(--acc2), var(--acc));
+            box-shadow: 0 1.6cqw 3.6cqw rgba(7, 24, 41, .3);
+            border: .6cqw solid #fff;
+        }
+
+        .bm-check {
+            position: absolute;
+            left: -4%;
+            bottom: 4%;
+            width: 8cqw;
+            height: 8cqw;
+            border-radius: 50%;
+            background: #22c55e;
+            border: .6cqw solid #fff;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            box-shadow: 0 1.2cqw 3cqw rgba(7, 24, 41, .25);
+        }
+
+        .bm-check svg {
+            width: 4.4cqw;
+            height: 4.4cqw;
+        }
+
+        /* Empty state + pagination */
+        .bm-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--bm-muted);
+            border: 1px dashed var(--bm-line);
+            border-radius: 18px;
+        }
+
+        .bm-empty[hidden] {
+            display: none;
+        }
+
+        .bm-pager {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 40px;
+        }
+
+        .bm-pager button {
+            font: inherit;
+            font-size: 14px;
+            min-width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            border: 1px solid var(--bm-line);
+            background: #fff;
+            color: var(--bm-ink);
+            cursor: pointer;
+        }
+
+        .bm-pager button.is-active {
+            background: var(--bm-blue);
+            border-color: var(--bm-blue);
+            color: #fff;
+        }
+
+        .bm-pager button:disabled {
+            opacity: .4;
+            cursor: default;
+        }
+
+        @media (max-width: 1024px) {
+            .bm-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .bm-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bm-search {
+                flex: 1 1 100%;
+            }
+
+            .bm-chips {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 4px;
+                scrollbar-width: none;
+            }
+
+            .bm-chip {
+                white-space: nowrap;
+            }
+
+            .bm-meta {
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .bm-card,
+            .bm-chip,
+            .bm-read span {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+
+<body data-page="blog">
+    <div class="noise"></div>
+    <header class="site-header"><a class="logo" href="/" aria-label="Blue Mark Advisory home"><img src="/assets/Blue_Mark_Advisory_Logo.png" alt="Blue Mark Advisory" class="header-logo-img"></a><button class="mobile-toggle"
+            aria-label="Open navigation" aria-expanded="false" type="button">☰ Menu</button>
+        <nav aria-label="Main navigation"><a href="/">Home</a><a href="/uk-services/">UK Services</a><a
+                href="/usa-services/">USA Services</a><a href="/about/">About</a><a href="/process/">Process</a><a
+                href="/blog/" aria-current="page">Blog</a><a href="/contact/">Contact</a><a class="nav-cta"
+                href="/contact/">Get a Quote ↗</a></nav>
+    </header>
+    <main>
+        <section class="hero blog">
+            <div class="hero-copy reveal">
+                <div class="eyebrow">Blue Mark insights</div>
+                <h1>Make sense of the<br><em>next decision.</em></h1>
+                <p>Explore the UK accounting and US formation topics our clients ask about most.</p>
+                <div class="hero-actions"><a class="btn primary" href="/contact/">Ask our team <span
+                            aria-hidden="true">↗</span></a><a class="btn" href="#insights">Browse insights ↓</a></div>
+
+                <!-- Legacy hooks kept hidden so app.js doesn't error; no audio plays -->
+                <div hidden><button type="button" id="playVoice"></button><button type="button"
+                        id="stopVoice"></button>
+                    <p class="voice-note"></p>
+                </div>
+
+                <div class="bm-ask">
+                    <div class="bm-ask-label"><span class="bm-live" aria-hidden="true"></span>Ask your Blue Mark advisor
+                    </div>
+                    <div class="bm-quick" id="bmQuick">
+                        <button type="button" data-q="uk">🇬🇧 UK company</button>
+                        <button type="button" data-q="usa">🇺🇸 US LLC</button>
+                        <button type="button" data-q="deadlines">📅 Tax deadlines</button>
+                        <button type="button" data-q="vat">🧾 VAT</button>
+                        <button type="button" data-q="itin">🪪 ITIN</button>
+                        <button type="button" data-q="quote">💬 Get a quote</button>
+                    </div>
+                    <form class="bm-ask-form" id="bmAskForm" autocomplete="off">
+                        <input type="text" id="bmAskInput" maxlength="160"
+                            placeholder="Type a question, e.g. “Do I need an EIN?”" aria-label="Ask a question">
+                        <button type="submit">Ask</button>
+                    </form>
+                </div>
+            </div>
+            <div class="stage" aria-label="Animated business advisor answering in speech bubbles">
+                <div class="bm-talk" id="bmTalk" role="log" aria-live="polite"></div>
+                <div class="halo"></div>
+                <div class="orbit-track"></div>
+                <div class="plinth"></div>
+                <div class="person ai-robot" aria-label="Blue Mark AI Advisor">
+                    <img src="/assets/ai-advisor.png" alt="Blue Mark AI Advisor" class="robot-avatar">
+                    <div class="robot-glow"></div>
+                </div>
+                <div class="bubble-layer" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <!-- ===== Blog grid ===== -->
+        <section class="section light bm-blog" id="insights">
+            <div class="section-head reveal">
+                <div>
+                    <div class="kicker">Insights</div>
+                    <h2>Topics worth your attention.</h2>
+                </div>
+                <p class="section-intro">Short topic summaries from the supplied site content. Ask our team for advice
+                    relevant to your circumstances.</p>
+            </div>
+
+            <div class="bm-toolbar">
+                <div class="bm-chips" role="tablist" aria-label="Filter insights by service">
+                    <button class="bm-chip is-active" type="button" data-filter="all">All <span class="count"></span></button>
+                    <button class="bm-chip" type="button" data-filter="uk">UK Services <span class="count"></span></button>
+                    <button class="bm-chip" type="button" data-filter="usa">USA Services <span class="count"></span></button>
+                    <button class="bm-chip" type="button" data-filter="formation">Formation <span class="count"></span></button>
+                    <button class="bm-chip" type="button" data-filter="tax">Tax <span class="count"></span></button>
+                    <button class="bm-chip" type="button" data-filter="compliance">Compliance <span class="count"></span></button>
+                    <button class="bm-chip" type="button" data-filter="accounting">Accounting <span class="count"></span></button>
+                </div>
+                <label class="bm-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m20 20-3.5-3.5" />
+                    </svg>
+                    <input type="search" id="bmSearch" placeholder="Search insights..." aria-label="Search insights">
+                </label>
+            </div>
+
+            <div class="bm-meta" aria-live="polite">
+                <span id="bmShowing"></span>
+                <span id="bmPage"></span>
+            </div>
+
+            <div class="bm-grid" id="bmGrid">
+
+                <!-- 1 -->
+                <article class="bm-card reveal" tabindex="0" data-cats="usa formation compliance"
+                    data-category="USA Compliance" data-date="19 Aug 2026"
+                    data-summary="Many non-resident owners treat formation as the finish line, but the first year brings its own paperwork. Getting an EIN, checking whether any beneficial ownership (BOI) reporting applies under current FinCEN rules, and filing Form 5472 with a pro forma 1120 are the three items most often missed. Mapping them onto a first-year compliance calendar avoids late-filing penalties.">
+                    <div class="bm-thumb t-usa" aria-hidden="true">
+                        <div class="bm-brand"><i>B</i>
+                            <div>Blue Mark<small>Formation · Tax · Compliance</small></div>
+                        </div>
+                        <div class="bm-headline">3 US Filings<br><mark>Non-Resident</mark><br>LLC Owners Miss</div>
+                        <div class="bm-icons">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10" /></svg>EIN</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4" /><path d="M4 21c1-4 4-6 8-6s7 2 8 6" /></svg>BOI</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l5 5v13H7z" /><path d="M14 3v5h5" /></svg>Form 5472</span>
+                        </div>
+                        <div class="bm-art">
+                            <div class="bm-doc back"><b>EIN</b><u></u><u></u><u></u></div>
+                            <div class="bm-doc"><b>Form 5472</b><u></u><u></u><u></u><u></u></div>
+                            <div class="bm-badge">US</div>
+                            <div class="bm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10" /></svg></div>
+                        </div>
+                    </div>
+                    <div class="bm-info"><span class="cat">USA Compliance</span><span class="dot">·</span>4 min
+                        read<span class="dot">·</span>19 Aug 2026</div>
+                    <h3 class="bm-card-title">Three US Filings Non-Resident LLC Owners Miss in Year One</h3>
+                    <p class="bm-excerpt">EIN, BOI reporting and Form 5472 — topics to discuss when planning a
+                        first-year LLC compliance calendar.</p>
+                    <div class="bm-card-foot"><span class="bm-read">Read summary <span aria-hidden="true">→</span></span><span
+                            class="bm-tag">Latest insight</span></div>
+                </article>
+
+                <!-- 2 -->
+                <article class="bm-card reveal" tabindex="0" data-cats="uk tax compliance" data-category="UK Tax"
+                    data-date="5 Aug 2026"
+                    data-summary="Registering for VAT becomes compulsory once taxable turnover passes the threshold, but some businesses benefit from registering earlier — for example to reclaim input VAT or to appear established to larger customers. The right timing, and the right scheme (standard, flat rate or cash accounting), depends on who your customers are and how your costs are structured.">
+                    <div class="bm-thumb t-uk" aria-hidden="true">
+                        <div class="bm-brand"><i>B</i>
+                            <div>Blue Mark<small>Formation · Tax · Compliance</small></div>
+                        </div>
+                        <div class="bm-headline">UK VAT<br><mark>Registration</mark><br>Threshold vs. Early</div>
+                        <div class="bm-icons">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19 20 5M7 7h.01M17 17h.01" /><circle cx="7" cy="7" r="2" /><circle cx="17" cy="17" r="2" /></svg>VAT Rate</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17 9 11l4 4 8-8" /><path d="M15 7h6v6" /></svg>Turnover</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>Timing</span>
+                        </div>
+                        <div class="bm-art">
+                            <div class="bm-doc back"><b>Scheme</b><u></u><u></u><u></u></div>
+                            <div class="bm-doc"><b>VAT1</b><u></u><u></u><u></u><u></u></div>
+                            <div class="bm-badge">UK</div>
+                            <div class="bm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10" /></svg></div>
+                        </div>
+                    </div>
+                    <div class="bm-info"><span class="cat">UK Tax</span><span class="dot">·</span>4 min read<span
+                            class="dot">·</span>5 Aug 2026</div>
+                    <h3 class="bm-card-title">UK VAT Registration: Compulsory Threshold vs. Registering Early</h3>
+                    <p class="bm-excerpt">How timing and VAT scheme selection can affect a growing UK business.</p>
+                    <div class="bm-card-foot"><span class="bm-read">Read summary <span aria-hidden="true">→</span></span><span
+                            class="bm-tag">UK Services</span></div>
+                </article>
+
+                <!-- 3 -->
+                <article class="bm-card reveal" tabindex="0" data-cats="uk usa formation"
+                    data-category="Formation" data-date="22 Jul 2026"
+                    data-summary="Choosing between a UK LTD and a US LLC usually comes down to where your customers are, which payment platforms and banks you need, and how much ongoing filing you are ready to manage. For businesses selling into both markets, running both entities is often the practical answer — as long as the compliance load on each side is planned from day one.">
+                    <div class="bm-thumb t-both" aria-hidden="true">
+                        <div class="bm-brand"><i>B</i>
+                            <div>Blue Mark<small>Formation · Tax · Compliance</small></div>
+                        </div>
+                        <div class="bm-headline">UK LTD or<br><mark>US LLC?</mark><br>Often It's Both</div>
+                        <div class="bm-icons">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M3 20c.8-3.5 3-5 6-5s5.2 1.5 6 5M15 15c3 0 5 1.5 6 4" /></svg>Customers</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10 12 4l9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18" /></svg>Banking</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8" /><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" /></svg>Filings</span>
+                        </div>
+                        <div class="bm-art">
+                            <div class="bm-doc back"><b>LLC</b><u></u><u></u><u></u></div>
+                            <div class="bm-doc"><b>LTD</b><u></u><u></u><u></u><u></u></div>
+                            <div class="bm-badge">UK+US</div>
+                            <div class="bm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10" /></svg></div>
+                        </div>
+                    </div>
+                    <div class="bm-info"><span class="cat">Formation</span><span class="dot">·</span>5 min read<span
+                            class="dot">·</span>22 Jul 2026</div>
+                    <h3 class="bm-card-title">UK LTD or US LLC? Why the Answer Is Often ‘Both’</h3>
+                    <p class="bm-excerpt">The structure decision depends on your customers, banking needs and ongoing
+                        filing obligations.</p>
+                    <div class="bm-card-foot"><span class="bm-read">Read summary <span aria-hidden="true">→</span></span><span
+                            class="bm-tag">UK &amp; USA</span></div>
+                </article>
+
+                <!-- 4 -->
+                <article class="bm-card reveal" tabindex="0" data-cats="uk tax compliance" data-category="UK Tax"
+                    data-date="9 Jul 2026"
+                    data-summary="Directors often assume their personal Self-Assessment and their company's CT600 share a deadline. They don't: personal returns follow the tax year, while Corporation Tax payment and filing dates follow the company's own accounting period. Mapping each deadline separately — and diarising them — is the simplest way to avoid penalties.">
+                    <div class="bm-thumb t-uk" aria-hidden="true">
+                        <div class="bm-brand"><i>B</i>
+                            <div>Blue Mark<small>Formation · Tax · Compliance</small></div>
+                        </div>
+                        <div class="bm-headline">Self-Assessment<br>&amp; <mark>CT600</mark><br>Different Dates</div>
+                        <div class="bm-icons">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4" /><path d="M4 21c1-4 4-6 8-6s7 2 8 6" /></svg>Personal</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6" /></svg>Company</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>Deadlines</span>
+                        </div>
+                        <div class="bm-art">
+                            <div class="bm-doc back"><b>SA100</b><u></u><u></u><u></u></div>
+                            <div class="bm-doc"><b>CT600</b><u></u><u></u><u></u><u></u></div>
+                            <div class="bm-badge">UK</div>
+                            <div class="bm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10" /></svg></div>
+                        </div>
+                    </div>
+                    <div class="bm-info"><span class="cat">UK Tax</span><span class="dot">·</span>3 min read<span
+                            class="dot">·</span>9 Jul 2026</div>
+                    <h3 class="bm-card-title">Self-Assessment and CT600 Deadlines Aren’t the Same Date</h3>
+                    <p class="bm-excerpt">A reminder to map personal and company tax deadlines separately.</p>
+                    <div class="bm-card-foot"><span class="bm-read">Read summary <span aria-hidden="true">→</span></span><span
+                            class="bm-tag">UK Services</span></div>
+                </article>
+
+                <!-- 5 -->
+                <article class="bm-card reveal" tabindex="0" data-cats="usa tax" data-category="USA Tax"
+                    data-date="27 Jun 2026"
+                    data-summary="An ITIN is applied for with Form W-7 alongside proof of identity and foreign status. Sending an original passport by post is not the only route — certified copies from the issuing agency, or an IRS-authorised Certifying Acceptance Agent, can verify documents for you. Which option fits depends on your reason for applying, so it is worth discussing before you submit.">
+                    <div class="bm-thumb t-usa" aria-hidden="true">
+                        <div class="bm-brand"><i>B</i>
+                            <div>Blue Mark<small>Formation · Tax · Compliance</small></div>
+                        </div>
+                        <div class="bm-headline">Get an ITIN<br><mark>Without Mailing</mark><br>Your Passport</div>
+                        <div class="bm-icons">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l5 5v13H7z" /><path d="M14 3v5h5" /></svg>Form W-7</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2" /><circle cx="12" cy="10" r="3" /><path d="M9 17h6" /></svg>ID Docs</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z" /><path d="m9 12 2 2 4-4" /></svg>CAA</span>
+                        </div>
+                        <div class="bm-art">
+                            <div class="bm-doc back"><b>Passport</b><u></u><u></u><u></u></div>
+                            <div class="bm-doc"><b>W-7</b><u></u><u></u><u></u><u></u></div>
+                            <div class="bm-badge">ITIN</div>
+                            <div class="bm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10" /></svg></div>
+                        </div>
+                    </div>
+                    <div class="bm-info"><span class="cat">USA Tax</span><span class="dot">·</span>4 min read<span
+                            class="dot">·</span>27 Jun 2026</div>
+                    <h3 class="bm-card-title">Applying for an ITIN Without Mailing Your Passport</h3>
+                    <p class="bm-excerpt">Form W-7, supporting documents and options to discuss with an advisor.</p>
+                    <div class="bm-card-foot"><span class="bm-read">Read summary <span aria-hidden="true">→</span></span><span
+                            class="bm-tag">USA Services</span></div>
+                </article>
+
+                <!-- 6 -->
+                <article class="bm-card reveal" tabindex="0" data-cats="uk accounting" data-category="Accounting"
+                    data-date="11 Jun 2026"
+                    data-summary="Statutory accounts look backwards and arrive months after the year ends. Monthly or quarterly management accounts give owners a live view of profit, cash and margins, making it easier to price, plan tax and spot problems early — even when no lender or regulator is asking for them.">
+                    <div class="bm-thumb t-uk" aria-hidden="true">
+                        <div class="bm-brand"><i>B</i>
+                            <div>Blue Mark<small>Formation · Tax · Compliance</small></div>
+                        </div>
+                        <div class="bm-headline">Why Bother With<br><mark>Management</mark><br>Accounts?</div>
+                        <div class="bm-icons">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg>P&amp;L</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2" /><circle cx="12" cy="12.5" r="2.5" /></svg>Cash Flow</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>Monthly</span>
+                        </div>
+                        <div class="bm-art">
+                            <div class="bm-doc back"><b>Q2</b><u></u><u></u><u></u></div>
+                            <div class="bm-doc"><b>Report</b><u></u><u></u><u></u><u></u></div>
+                            <div class="bm-badge">£</div>
+                            <div class="bm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10" /></svg></div>
+                        </div>
+                    </div>
+                    <div class="bm-info"><span class="cat">Accounting</span><span class="dot">·</span>3 min read<span
+                            class="dot">·</span>11 Jun 2026</div>
+                    <h3 class="bm-card-title">Why Bother With Management Accounts If Nobody Requires Them?</h3>
+                    <p class="bm-excerpt">Management reporting can give owners a clearer view before year-end figures
+                        arrive.</p>
+                    <div class="bm-card-foot"><span class="bm-read">Read summary <span aria-hidden="true">→</span></span><span
+                            class="bm-tag">UK Services</span></div>
+                </article>
+
+            </div>
+
+            <div class="bm-empty" id="bmEmpty" hidden>No insights match your search yet. <a href="/contact/">Ask our
+                    team</a> instead.</div>
+            <nav class="bm-pager" id="bmPager" aria-label="Insights pages"></nav>
+        </section>
+
+        <div class="article-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Article summary">
+            <div class="article-panel"><button class="article-close"
+                    aria-label="Close summary">×</button><small></small>
+                <h2></h2>
+                <div class="accent-line"></div>
+                <p></p>
+                <p>For the full article or guidance tailored to your business, please contact Blue Mark Advisory.</p><a
+                    class="btn primary" href="/contact/">Contact us ↗</a>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer-inner">
+            <div><a class="logo" href="/"><img src="/assets/Blue_Mark_Advisory_Logo.png" alt="Blue Mark Advisory" class="header-logo-img"></a>
+                <p>LLC & LTD formation, compliance and taxation across the United Kingdom and United States.</p>
+                <p>AWIS EJAZ LLC, trading as Blue Mark Advisory.</p>
+            </div>
+            <div>
+                <h4>Explore</h4>
+                <p><a href="/uk-services/">UK Services</a><br><a href="/usa-services/">USA Services</a><br><a
+                        href="/about/">About Us</a><br><a href="/process/">Our Process</a><br><a
+                        href="/blog/">Insights</a></p>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <p><a href="mailto:manager@awisejaz.com">manager@awisejaz.com</a><br><a href="tel:+923179815457">+92 317
+                        9815457</a><br>1064, Street 1, Bahria Safari Valley, Usman Block, Rawalpindi, Pakistan</p>
+            </div>
+        </div>
+        <div class="footer-bottom">© 2026 AWIS EJAZ LLC / Blue Mark Advisory · UK & USA</div>
+    </footer>
+
+    <!-- ===== Blog grid: filter, search, pagination, summary modal ===== -->
+    <script>
+        (function () {
+            var PER_PAGE = 9;
+            var cards = Array.prototype.slice.call(document.querySelectorAll('.bm-card'));
+            var chips = document.querySelectorAll('.bm-chip');
+            var search = document.getElementById('bmSearch');
+            var showing = document.getElementById('bmShowing');
+            var pageLbl = document.getElementById('bmPage');
+            var pager = document.getElementById('bmPager');
+            var empty = document.getElementById('bmEmpty');
+            var filter = 'all', query = '', page = 1;
+
+            // Chip counts
+            chips.forEach(function (chip) {
+                var f = chip.dataset.filter;
+                var n = f === 'all' ? cards.length : cards.filter(function (c) {
+                    return c.dataset.cats.split(' ').indexOf(f) > -1;
+                }).length;
+                chip.querySelector('.count').textContent = '(' + n + ')';
+            });
+
+            function matches(card) {
+                var inCat = filter === 'all' || card.dataset.cats.split(' ').indexOf(filter) > -1;
+                var text = (card.textContent + ' ' + card.dataset.summary).toLowerCase();
+                return inCat && (!query || text.indexOf(query) > -1);
+            }
+
+            function render() {
+                var list = cards.filter(matches);
+                var pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+                if (page > pages) page = pages;
+                var start = (page - 1) * PER_PAGE;
+                var end = Math.min(start + PER_PAGE, list.length);
+
+                cards.forEach(function (c) { c.hidden = true; c.classList.add('visible', 'in'); });
+                list.slice(start, end).forEach(function (c) { c.hidden = false; });
+
+                empty.hidden = list.length > 0;
+                showing.innerHTML = list.length
+                    ? 'Showing <b>' + (start + 1) + '–' + end + '</b> of <b>' + list.length + '</b> insights'
+                    : 'Showing <b>0</b> insights';
+                pageLbl.innerHTML = 'Page <b>' + page + '</b> of <b>' + pages + '</b>';
+
+                pager.innerHTML = '';
+                if (pages > 1) {
+                    var mk = function (label, p, active, disabled) {
+                        var b = document.createElement('button');
+                        b.type = 'button'; b.textContent = label;
+                        if (active) b.className = 'is-active';
+                        b.disabled = !!disabled;
+                        b.addEventListener('click', function () {
+                            page = p; render();
+                            document.getElementById('insights').scrollIntoView({ behavior: 'smooth' });
+                        });
+                        pager.appendChild(b);
+                    };
+                    mk('←', page - 1, false, page === 1);
+                    for (var i = 1; i <= pages; i++) mk(String(i), i, i === page);
+                    mk('→', page + 1, false, page === pages);
+                }
+            }
+
+            chips.forEach(function (chip) {
+                chip.addEventListener('click', function () {
+                    chips.forEach(function (c) { c.classList.remove('is-active'); });
+                    chip.classList.add('is-active');
+                    filter = chip.dataset.filter; page = 1; render();
+                });
+            });
+
+            search.addEventListener('input', function () {
+                query = search.value.trim().toLowerCase(); page = 1; render();
+            });
+
+            // Summary modal
+            var modal = document.querySelector('.article-modal');
+            var lastFocus = null;
+            function openModal(card) {
+                lastFocus = card;
+                modal.querySelector('small').textContent = card.dataset.category + ' · ' + card.dataset.date;
+                modal.querySelector('h2').textContent = card.querySelector('.bm-card-title').textContent;
+                modal.querySelector('p').textContent = card.dataset.summary;
+                modal.classList.add('open', 'is-open', 'active');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                modal.querySelector('.article-close').focus();
+            }
+            function closeModal() {
+                modal.classList.remove('open', 'is-open', 'active');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                if (lastFocus) lastFocus.focus();
+            }
+            cards.forEach(function (card) {
+                card.addEventListener('click', function () { openModal(card); });
+                card.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(card); }
+                });
+            });
+            modal.querySelector('.article-close').addEventListener('click', closeModal);
+            modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeModal();
+            });
+
+            render();
+        })();
+    </script>
+
+    <!-- ===== Hero chat bot: speech bubbles instead of voice ===== -->
+    <script>
+        (function () {
+            var talk = document.getElementById('bmTalk');
+            var person = document.querySelector('.stage .person');
+            var form = document.getElementById('bmAskForm');
+            var input = document.getElementById('bmAskInput');
+            var stage = document.querySelector('.stage');
+            if (!talk || !person) return;
+
+            var MAX_BUBBLES = 3;
+            var busy = false, userActive = false, idleTimer = null, tipIndex = 0;
+
+            // Opens a blog card's summary modal by its position in the grid
+            function openPost(n) {
+                var card = document.querySelectorAll('.bm-card')[n];
+                if (card) card.click();
+            }
+
+            // Answers: text + optional action (link or open post)
+            var ANSWERS = {
+                hello: { text: "Hi! 👋 I'm your Blue Mark advisor. Ask me about UK or US companies, tax deadlines, VAT or ITINs." },
+                uk: {
+                    text: "Starting in the UK? We handle LTD formation, accounting, CT600 corporation tax returns and ongoing compliance with Companies House and HMRC.",
+                    link: { label: "See UK services →", href: "/uk-services/" }
+                },
+                usa: {
+                    text: "For non-residents we form US LLCs and help with the first-year essentials, like your EIN and Form 5472, so nothing gets missed.",
+                    post: { label: "Read: 3 filings owners miss →", n: 0 }
+                },
+                both: {
+                    text: "Selling to both the UK and the US? Often the right answer is a UK LTD and a US LLC working side by side.",
+                    post: { label: "Read: LTD or LLC? →", n: 2 }
+                },
+                deadlines: {
+                    text: "Careful: your personal Self-Assessment and your company's CT600 run on different dates. Map each one separately.",
+                    post: { label: "Read the deadline guide →", n: 3 }
+                },
+                vat: {
+                    text: "VAT is compulsory past the threshold, but registering early can sometimes help. Timing and scheme choice both matter.",
+                    post: { label: "Read about VAT timing →", n: 1 }
+                },
+                itin: {
+                    text: "You can apply for an ITIN with Form W-7, and mailing your original passport isn't the only option.",
+                    post: { label: "Read: ITIN without posting a passport →", n: 4 }
+                },
+                accounts: {
+                    text: "Management accounts give you a clear view of profit and cash during the year, not just at year-end.",
+                    post: { label: "Read why they're worth it →", n: 5 }
+                },
+                quote: {
+                    text: "Happy to help! Tell our team what you need and we'll come back with a quote tailored to you.",
+                    link: { label: "Get a quote →", href: "/contact/" }
+                },
+                contact: {
+                    text: "You can email manager@awisejaz.com or call +92 317 9815457. Or use our contact form.",
+                    link: { label: "Contact us →", href: "/contact/" }
+                },
+                fallback: {
+                    text: "Good question. That one's best answered by our team, based on your situation.",
+                    link: { label: "Ask our team →", href: "/contact/" }
+                }
+            };
+
+            // Keyword routing for free-typed questions
+            var RULES = [
+                ['hello', /\b(hi|hello|hey|salam|assalam)\b/],
+                ['itin', /itin|w-?7|passport/],
+                ['vat', /\bvat\b/],
+                ['deadlines', /deadline|self.?assessment|ct600|corporation tax|due date|when.*(file|pay)/],
+                ['both', /\bboth\b|ltd.*llc|llc.*ltd|which (one|structure)|uk or us/],
+                ['usa', /\bllc\b|\bus\b|usa|america|ein|5472|boi|delaware|wyoming|irs/],
+                ['uk', /\buk\b|\bltd\b|limited|britain|england|companies house|hmrc/],
+                ['accounts', /management account|bookkeep|accounting|accounts|p&l|cash ?flow/],
+                ['quote', /price|cost|fee|quote|how much|charge/],
+                ['contact', /contact|email|phone|call|whatsapp|talk to/]
+            ];
+
+            function route(q) {
+                q = q.toLowerCase();
+                for (var i = 0; i < RULES.length; i++) if (RULES[i][1].test(q)) return RULES[i][0];
+                return 'fallback';
+            }
+
+            // Bubble helpers
+            function trim() {
+                var all = talk.querySelectorAll('.bm-bubble:not(.leaving)');
+                for (var i = 0; i < all.length - MAX_BUBBLES; i++) {
+                    (function (el) {
+                        el.classList.add('leaving');
+                        setTimeout(function () { el.remove(); }, 300);
+                    })(all[i]);
+                }
+            }
+
+            function bubble(cls, html) {
+                var b = document.createElement('div');
+                b.className = 'bm-bubble ' + cls;
+                b.innerHTML = html;
+                talk.appendChild(b);
+                trim();
+                return b;
+            }
+
+            function esc(s) {
+                return s.replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+
+            function say(key, done) {
+                var a = ANSWERS[key];
+                busy = true;
+                var typing = bubble('bot', '<span class="bm-typing" aria-label="Advisor is typing"><i></i><i></i><i></i></span>');
+                setTimeout(function () {
+                    var html = '<div class="who">Blue Mark advisor</div><span class="txt"></span>';
+                    if (a.link) html += '<br><a href="' + a.link.href + '">' + a.link.label + '</a>';
+                    if (a.post) html += '<br><button type="button" class="bm-link">' + a.post.label + '</button>';
+                    typing.innerHTML = html;
+                    if (a.post) typing.querySelector('.bm-link').addEventListener('click', function () { openPost(a.post.n); });
+
+                    // Type the words out while the mouth moves
+                    var span = typing.querySelector('.txt');
+                    var words = a.text.split(' '), i = 0;
+                    person.classList.add('is-talking');
+                    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    if (reduced) { span.textContent = a.text; finish(); return; }
+                    (function next() {
+                        if (i >= words.length) { finish(); return; }
+                        span.textContent += (i ? ' ' : '') + words[i++];
+                        setTimeout(next, 55);
+                    })();
+                    function finish() {
+                        person.classList.remove('is-talking');
+                        busy = false;
+                        if (done) done();
+                    }
+                }, 650 + Math.random() * 350);
+            }
+
+            function ask(label, key) {
+                if (busy) return;
+                userActive = true;
+                clearTimeout(idleTimer);
+                bubble('user', esc(label));
+                say(key);
+            }
+
+            // Quick-reply chips
+            document.querySelectorAll('#bmQuick button').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    ask(btn.textContent.replace(/^\S+\s/, ''), btn.dataset.q);
+                });
+            });
+
+            // Free-text questions
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var q = input.value.trim();
+                if (!q || busy) return;
+                input.value = '';
+                ask(q, route(q));
+            });
+
+            // Clicking the advisor: wave + next tip
+            var TIPS = ['uk', 'usa', 'deadlines', 'vat', 'itin', 'accounts'];
+            person.addEventListener('click', function () {
+                if (busy) return;
+                person.classList.remove('is-waving');
+                void person.offsetWidth;
+                person.classList.add('is-waving');
+                say(TIPS[tipIndex++ % TIPS.length]);
+            });
+
+            // Eyes follow the pointer
+            var eyes = stage.querySelectorAll('.eye');
+            window.addEventListener('pointermove', function (e) {
+                var r = person.getBoundingClientRect();
+                var dx = (e.clientX - (r.left + r.width / 2)) / window.innerWidth;
+                var dy = (e.clientY - (r.top + r.height * .2)) / window.innerHeight;
+                var x = Math.max(-1, Math.min(1, dx * 3)) * 2.5;
+                var y = Math.max(-1, Math.min(1, dy * 3)) * 2;
+                eyes.forEach(function (el) { el.style.translate = x + 'px ' + y + 'px'; });
+            }, { passive: true });
+
+            // Intro: greet, then rotate tips until the visitor interacts
+            var INTRO = [
+                "Hi! 👋 I'm your Blue Mark advisor.",
+                "I can point you to UK and US formation, tax and compliance help.",
+                "Tap a topic on the left, type a question, or click me for a tip."
+            ];
+            function intro(i) {
+                if (userActive || i >= INTRO.length) { scheduleIdle(); return; }
+                ANSWERS._intro = { text: INTRO[i] };
+                say('_intro', function () { setTimeout(function () { intro(i + 1); }, 1400); });
+            }
+            function scheduleIdle() {
+                clearTimeout(idleTimer);
+                if (userActive) return;
+                idleTimer = setTimeout(function () {
+                    if (!busy && !userActive && document.visibilityState === 'visible') {
+                        say(TIPS[tipIndex++ % TIPS.length], scheduleIdle);
+                    } else scheduleIdle();
+                }, 9000);
+            }
+
+            // Start once the hero is visible
+            var started = false;
+            function start() {
+                if (started) return; started = true;
+                person.classList.add('is-waving');
+                setTimeout(function () { intro(0); }, 500);
+            }
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries, obs) {
+                    if (entries[0].isIntersecting) { start(); obs.disconnect(); }
+                }, { threshold: .3 }).observe(stage);
+            } else start();
+        })();
+    </script>
+</body>
+
+</html>
